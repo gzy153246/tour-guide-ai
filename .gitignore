@@ -1,0 +1,37 @@
+# ---- 环境变量（含 API Key，绝不能入库）----
+.env
+backend/.env
+*.env
+*.env.*
+
+# ---- 虚拟环境 ----
+venv/
+backend/venv/
+.venv/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ---- IDE / 编辑器 ----
+.idea/
+.vs/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# ---- 运行时数据：默认全忽略，只放行景点候选库 ----
+data/*
+!data/attractions.json
+
+# ---- 日志 ----
+logs/
+*.log
+
+# ---- 备份 ----
+*_backup*
+_backup*/
+*.bak

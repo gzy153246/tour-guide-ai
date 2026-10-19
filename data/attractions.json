@@ -1,0 +1,1363 @@
+{
+  "version": "1.0",
+  "city": "北京市",
+  "note": "行程规划的候选景点目录。tags 取值与前端兴趣标签一致：history/nature/photo/food/family，classic 表示必看级；area 用于同日分区聚合；windows 为可安排的时段；closed_weekday 使用 Python weekday 约定（0=周一 … 6=周日）；ticket 为成人票参考价（元，淡旺季可能浮动，务必以官方渠道为准）。 lat/lng 为 GCJ-02 坐标（高德地理编码，与前端高德瓦片同源），area 分区见 areas 字段。",
+  "interests": [
+    "history",
+    "nature",
+    "photo",
+    "food",
+    "family"
+  ],
+  "areas": {
+    "core": "中轴线与老城（天安门、故宫、什刹海、南锣鼓巷、前门）",
+    "west": "西城与海淀（颐和园、圆明园、香山、动物园、博物馆群）",
+    "east": "东城东部与朝阳（簋街、798、三里屯、朝阳公园）",
+    "north": "奥林匹克与北辰（鸟巢、水立方、科技馆）",
+    "outskirt": "远郊（长城、十三陵、野生动物园、卢沟桥）",
+    "fun": "主题乐园（需整日）"
+  },
+  "attractions": [
+    {
+      "name": "故宫博物院",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo",
+        "classic"
+      ],
+      "area": "core",
+      "rank": 1,
+      "duration": 3.5,
+      "ticket": 60,
+      "indoor": true,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "明清两代皇宫，现存规模最大的木结构宫殿建筑群，中轴线上的精华。",
+      "tip": "实名提前预约，周一闭馆；午门进、神武门出最顺",
+      "lng": 116.397029,
+      "lat": 39.917839,
+      "address": "景山前街4号"
+    },
+    {
+      "name": "天安门广场",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo",
+        "classic"
+      ],
+      "area": "core",
+      "rank": 1,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "desc": "世界最大的城市中心广场，人民英雄纪念碑与周边建筑群构成北京封面。",
+      "tip": "需实名预约并安检，勿携带违禁品",
+      "lng": 116.397755,
+      "lat": 39.903182,
+      "address": "东长安街"
+    },
+    {
+      "name": "中国国家博物馆",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "classic"
+      ],
+      "area": "core",
+      "rank": 1,
+      "duration": 2.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "\"古代中国\"基本陈列浓缩中华文明主线，司母戊鼎、四羊方尊皆在此。",
+      "tip": "免费但必须提前预约，周一闭馆",
+      "lng": 116.401304,
+      "lat": 39.905374,
+      "address": "东长安街16号天安门广场东侧"
+    },
+    {
+      "name": "景山公园 · 万春亭",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "history",
+        "nature"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 1.0,
+      "ticket": 2,
+      "indoor": false,
+      "windows": [
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "desc": "中轴线制高点，万春亭俯瞰故宫金顶全景的经典机位。",
+      "tip": "日落前一小时上山占位，出片最佳",
+      "lng": 116.396715,
+      "lat": 39.924863,
+      "address": "景山西街44号景山公园内"
+    },
+    {
+      "name": "北海公园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "photo",
+        "history"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 10,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "白塔映碧波的皇家园林，可环琼华岛漫步或湖面泛舟。",
+      "tip": "傍晚湖面倒影与团城都很出片",
+      "lng": 116.391802,
+      "lat": 39.928775,
+      "address": "文津街1号"
+    },
+    {
+      "name": "什刹海 · 烟袋斜街",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "food",
+        "history"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "desc": "胡同、王府与水岸交织的老北京生活区，酒吧街夜色有名。",
+      "tip": "傍晚蓝调时刻最有味道，环湖步行一圈约 40 分钟",
+      "lng": 116.394748,
+      "lat": 39.939329,
+      "address": "地安门外大街48号(什刹海地铁站A2西北口步行130米)"
+    },
+    {
+      "name": "南锣鼓巷",
+      "kind": "spot",
+      "tags": [
+        "food",
+        "photo",
+        "history"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "desc": "元大都遗留的鱼骨状胡同区，两侧是咖啡馆、小馆与文创店。",
+      "tip": "节假日人流极大，建议错峰或深入两侧支巷",
+      "lng": 116.402394,
+      "lat": 39.937182,
+      "address": "交道口街道南大街(南锣鼓巷地铁站E西北口旁)"
+    },
+    {
+      "name": "恭王府 · 萃锦园",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 1.5,
+      "ticket": 40,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "清代规模最大的王府建筑群，和珅旧宅，花园精致。",
+      "tip": "福字碑排队人多，先逛花园再折返；周一闭馆",
+      "lng": 116.38592,
+      "lat": 39.937195,
+      "address": "什刹海前海西街17号恭王府内"
+    },
+    {
+      "name": "雍和宫",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 1.5,
+      "ticket": 25,
+      "indoor": true,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "北京规格最高的藏传佛教寺院，万福阁白檀木弥勒高 18 米。",
+      "tip": "门口可领免费香，着装得体、殿内勿拍摄",
+      "lng": 116.417296,
+      "lat": 39.947239,
+      "address": "雍和宫大街28号(雍和宫地铁站F东南口步行250米)"
+    },
+    {
+      "name": "孔庙 · 国子监",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.2,
+      "ticket": 30,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "元明清三代最高学府与祭孔场所，碑林与辟雍值得细看。",
+      "tip": "与雍和宫相距一站路，可连游",
+      "lng": 116.413285,
+      "lat": 39.946777,
+      "address": "国子监街13-15号"
+    },
+    {
+      "name": "中国美术馆",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "history"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "国家级美术殿堂，常设展与名家大展密集，建筑本身也耐看。",
+      "tip": "免费预约入馆，周一闭馆",
+      "lng": 116.408939,
+      "lat": 39.925255,
+      "address": "五四大街1号"
+    },
+    {
+      "name": "天坛公园",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo",
+        "nature"
+      ],
+      "area": "core",
+      "rank": 1,
+      "duration": 2.5,
+      "ticket": 34,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "明清皇帝祭天之所，祈年殿三重蓝琉璃檐是北京地标。",
+      "tip": "买联票含祈年殿与回音壁；早上有市民晨练很热闹",
+      "lng": 116.410829,
+      "lat": 39.881913,
+      "address": "天坛东里甲1号"
+    },
+    {
+      "name": "颐和园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "history",
+        "photo",
+        "classic"
+      ],
+      "area": "west",
+      "rank": 1,
+      "duration": 3.5,
+      "ticket": 60,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "保存最完整的皇家园林，昆明湖、长廊、佛香阁构成经典画面。",
+      "tip": "东宫门进、北宫门出最省力；可乘船横穿昆明湖",
+      "lng": 116.275179,
+      "lat": 39.999617,
+      "address": "新建宫门路19号"
+    },
+    {
+      "name": "圆明园遗址公园",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "nature"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 2.5,
+      "ticket": 25,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "西洋楼遗址与大水法残柱，是近代史最直观的一处现场。",
+      "tip": "园子极大，建议配合电瓶车；夏季荷花正盛",
+      "lng": 116.300875,
+      "lat": 40.006502,
+      "address": "清华西路28号"
+    },
+    {
+      "name": "香山公园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "photo"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 3.0,
+      "ticket": 10,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "香炉峰可俯瞰京城，十月中至十一月初的红叶名动全国。",
+      "tip": "红叶季人山人海，务必早出发；平日登山约 1.5 小时",
+      "lng": 116.188746,
+      "lat": 39.990107,
+      "address": "香山买卖街40号"
+    },
+    {
+      "name": "国家植物园（北园 · 南园）",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "family"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 2.5,
+      "ticket": 10,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "温室大温室与月季园、曹雪芹纪念馆相连，植物种类极丰富。",
+      "tip": "温室单独收费，亲子科普首选",
+      "lng": 116.210714,
+      "lat": 39.998036,
+      "address": "香泉环岛1号"
+    },
+    {
+      "name": "颐和园 · 苏州街 & 耕织图",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "history"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.2,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "后湖两岸仿江南水镇街市，水巷格局与别处不同。",
+      "tip": "含在颐和园门票内，人少清静",
+      "lng": 116.27399,
+      "lat": 40.002055,
+      "address": "新建宫门路19号颐和园内(北宫门地铁站A西北口步行350米)"
+    },
+    {
+      "name": "北京动物园 · 海洋馆",
+      "kind": "spot",
+      "tags": [
+        "family",
+        "nature"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 3.0,
+      "ticket": 175,
+      "indoor": true,
+      "windows": [
+        "morning"
+      ],
+      "closed_weekday": [],
+      "desc": "大熊猫馆是必看项，海洋馆的海豚表演适合小朋友。",
+      "tip": "联票含两馆；上午熊猫最活跃",
+      "lng": 116.340971,
+      "lat": 39.944676,
+      "address": "气象路6号"
+    },
+    {
+      "name": "紫竹院公园",
+      "kind": "spot",
+      "tags": [
+        "nature"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "免费的城市园林，湖面开阔、竹林成片，本地人散步偏好地。",
+      "tip": "可乘摇橹船，春夏荷花不错",
+      "lng": 116.319079,
+      "lat": 39.942352,
+      "address": "中关村南大街35号"
+    },
+    {
+      "name": "玉渊潭公园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "photo"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 2,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "京城赏樱首选，三月末至四月初樱花大道连绵成云。",
+      "tip": "樱花季需网上预约错峰入园",
+      "lng": 116.319932,
+      "lat": 39.91662,
+      "address": "西三环中路10号"
+    },
+    {
+      "name": "首都博物馆",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "北京通史陈列与老北京民俗展，讲清这座城三千年的建城脉络。",
+      "tip": "免费预约，周一闭馆",
+      "lng": 116.342067,
+      "lat": 39.906412,
+      "address": "复兴门外大街16号"
+    },
+    {
+      "name": "中国人民革命军事博物馆",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "family"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "兵器装备陈列规模可观，飞机坦克实景展出，男孩子最爱。",
+      "tip": "免费预约，周一闭馆",
+      "lng": 116.323871,
+      "lat": 39.909108,
+      "address": "复兴路9号"
+    },
+    {
+      "name": "妙应寺白塔",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.0,
+      "ticket": 20,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "元代藏式白塔，胡同环绕，是老城最有辨识度的天际线之一。",
+      "tip": "周边胡同咖啡馆适合小憩",
+      "lng": 116.363323,
+      "lat": 39.925652,
+      "address": "阜成门内大街171号"
+    },
+    {
+      "name": "北京鲁迅博物馆",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.2,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "鲁迅在京故居与生平展，庭院幽静，展陈考究。",
+      "tip": "免费预约，周一闭馆",
+      "lng": 116.358742,
+      "lat": 39.925693,
+      "address": "阜城门内宫门口二条19号(阜成门地铁站B东北口步行260米)"
+    },
+    {
+      "name": "北京天文馆",
+      "kind": "spot",
+      "tags": [
+        "family",
+        "photo"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 2.0,
+      "ticket": 30,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0,
+        1
+      ],
+      "desc": "天象厅球幕放映效果震撼，展厅互动性强，适合带孩子。",
+      "tip": "周一、周二闭馆，场次有限先查时间",
+      "lng": 116.336833,
+      "lat": 39.937306,
+      "address": "西直门外大街138号"
+    },
+    {
+      "name": "清华大学 · 北京大学校园",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "history"
+      ],
+      "area": "west",
+      "rank": 2,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "水木清华、未名湖博雅塔，中国最高学府的园林与建筑。",
+      "tip": "需官方渠道预约入校，名额紧张要抢",
+      "lng": 116.320713,
+      "lat": 40.009392,
+      "address": "中关村大街清华大学北侧"
+    },
+    {
+      "name": "798 艺术区",
+      "kind": "spot",
+      "tags": [
+        "photo"
+      ],
+      "area": "east",
+      "rank": 2,
+      "duration": 2.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "包豪斯厂房改造的画廊聚落，大型展与涂鸦装置随手出片。",
+      "tip": "多数画廊周一闭馆，去前先查当日展讯",
+      "lng": 116.494784,
+      "lat": 39.985063,
+      "address": "酒仙桥路4号"
+    },
+    {
+      "name": "中国科学技术馆",
+      "kind": "spot",
+      "tags": [
+        "family"
+      ],
+      "area": "north",
+      "rank": 2,
+      "duration": 3.0,
+      "ticket": 30,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "互动展项丰富，\"科学乐园\"能让小朋友玩一整个下午。",
+      "tip": "需提前预约，周一闭馆",
+      "lng": 116.398595,
+      "lat": 40.006023,
+      "address": "北辰东路5号"
+    },
+    {
+      "name": "国家自然博物馆",
+      "kind": "spot",
+      "tags": [
+        "family",
+        "nature"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "古生物展厅的恐龙骨架是招牌，适合亲子科普半日。",
+      "tip": "免费预约，周一闭馆，暑期极难约",
+      "lng": 116.399833,
+      "lat": 39.883183,
+      "address": "天桥南大街126号"
+    },
+    {
+      "name": "朝阳公园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "family"
+      ],
+      "area": "east",
+      "rank": 3,
+      "duration": 2.0,
+      "ticket": 5,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "城区大型综合公园，湖面、草坪与游乐设施齐备。",
+      "tip": "傍晚常有市集与演出活动",
+      "lng": 116.482276,
+      "lat": 39.944093,
+      "address": "朝阳公园南路1号"
+    },
+    {
+      "name": "奥林匹克公园（鸟巢 · 水立方）",
+      "kind": "spot",
+      "tags": [
+        "photo",
+        "family",
+        "classic"
+      ],
+      "area": "north",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "desc": "双奥地标同框，广场开阔，夜景是北京最出名的現代夜景之一。",
+      "tip": "夜景约 19:00 后亮灯，入场馆需另购票",
+      "lng": 116.392159,
+      "lat": 40.018635,
+      "address": "科荟路33号"
+    },
+    {
+      "name": "奥林匹克森林公园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "family"
+      ],
+      "area": "north",
+      "rank": 2,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "城区最大免费森林公园，跑步、骑行、亲子露营皆宜。",
+      "tip": "与鸟巢水立方连一线安排半天刚好",
+      "lng": 116.391365,
+      "lat": 40.016194,
+      "address": "科荟路33号"
+    },
+    {
+      "name": "中国工艺美术馆 · 中国非物质文化遗产馆",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo"
+      ],
+      "area": "north",
+      "rank": 3,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [
+        0
+      ],
+      "desc": "国家级工艺美术与非遗展陈，玉雕、景泰蓝、刺绣件件精品。",
+      "tip": "免费预约，周一闭馆",
+      "lng": 116.39758,
+      "lat": 40.003726,
+      "address": "湖景东路16号"
+    },
+    {
+      "name": "八达岭长城",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo",
+        "nature",
+        "classic"
+      ],
+      "area": "outskirt",
+      "rank": 1,
+      "duration": 4.5,
+      "ticket": 40,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "明长城中保存最好的一段，\"不到长城非好汉\"的所指。",
+      "tip": "往返加排队基本一整天；高铁或旅游专线更省心",
+      "lng": 116.016802,
+      "lat": 40.356188,
+      "address": "G6京藏高速"
+    },
+    {
+      "name": "慕田峪长城",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo",
+        "nature"
+      ],
+      "area": "outskirt",
+      "rank": 1,
+      "duration": 4.5,
+      "ticket": 45,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "植被茂密、敌楼密集，坡度比八达岭陡但人相对少。",
+      "tip": "可乘缆车上、滑道下，节省体力",
+      "lng": 116.565052,
+      "lat": 40.431668,
+      "address": "渤海镇慕田峪村"
+    },
+    {
+      "name": "居庸关长城",
+      "kind": "spot",
+      "tags": [
+        "history",
+        "photo"
+      ],
+      "area": "outskirt",
+      "rank": 3,
+      "duration": 3.0,
+      "ticket": 40,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "\"天下第一雄关\"，关城格局完整，春季花海列车穿山而过。",
+      "tip": "与十三陵顺路可同日安排",
+      "lng": 116.073088,
+      "lat": 40.291161,
+      "address": "G6京藏高速216省道旁"
+    },
+    {
+      "name": "明十三陵（长陵 · 定陵）",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "outskirt",
+      "rank": 2,
+      "duration": 3.0,
+      "ticket": 60,
+      "indoor": true,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "明代帝陵群中开放的两处，定陵地宫深入地下的体验独特。",
+      "tip": "与居庸关顺路，半天连游最划算",
+      "lng": 116.225759,
+      "lat": 40.294843,
+      "address": "十三陵特区"
+    },
+    {
+      "name": "卢沟桥 · 宛平城",
+      "kind": "spot",
+      "tags": [
+        "history"
+      ],
+      "area": "outskirt",
+      "rank": 3,
+      "duration": 2.0,
+      "ticket": 20,
+      "indoor": false,
+      "windows": [
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "八百年石桥与桥头石狮，宛平城内保存着完整的抗战印记。",
+      "tip": "与抗日战争纪念馆连游半天",
+      "lng": 116.226098,
+      "lat": 39.851436,
+      "address": "卢沟桥南里10号"
+    },
+    {
+      "name": "北京园博园",
+      "kind": "spot",
+      "tags": [
+        "nature",
+        "family"
+      ],
+      "area": "outskirt",
+      "rank": 3,
+      "duration": 3.0,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon"
+      ],
+      "closed_weekday": [],
+      "desc": "汇集各地园林微缩景观，园区极大适合慢逛与野餐。",
+      "tip": "园区内电瓶车与自行车很必要",
+      "lng": 116.190595,
+      "lat": 39.876665,
+      "address": "射击场路15号"
+    },
+    {
+      "name": "北京野生动物园",
+      "kind": "spot",
+      "tags": [
+        "family",
+        "nature"
+      ],
+      "area": "outskirt",
+      "rank": 2,
+      "duration": 4.0,
+      "ticket": 150,
+      "indoor": false,
+      "windows": [
+        "morning"
+      ],
+      "closed_weekday": [],
+      "desc": "自驾游览区与猛兽体验区是特色，孩子可以近距离看动物。",
+      "tip": "在大兴区，往返建议留足半天以上",
+      "lng": 116.334681,
+      "lat": 39.496435,
+      "address": "榆顺路2号榆垡镇万亩森林内"
+    },
+    {
+      "name": "北京环球度假区",
+      "kind": "spot",
+      "tags": [
+        "family",
+        "photo"
+      ],
+      "area": "fun",
+      "rank": 1,
+      "duration": 9.0,
+      "ticket": 528,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "whole_day": true,
+      "desc": "哈利波特魔法世界与变形金刚基地是招牌，一个园区玩一整天。",
+      "tip": "务必单独安排一天，提前下载官方 App 看排队时长",
+      "lng": 116.681212,
+      "lat": 39.852698,
+      "address": "梨园镇环球大道"
+    },
+    {
+      "name": "北京欢乐谷",
+      "kind": "spot",
+      "tags": [
+        "family"
+      ],
+      "area": "fun",
+      "rank": 2,
+      "duration": 8.0,
+      "ticket": 299,
+      "indoor": false,
+      "windows": [
+        "morning",
+        "afternoon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "whole_day": true,
+      "desc": "大型主题乐园，过山车项目密集，适合青少年释放精力。",
+      "tip": "单独安排一天；夏季有水上项目，多备一套衣服",
+      "lng": 116.494743,
+      "lat": 39.867355,
+      "address": "东四环小武基北路"
+    },
+    {
+      "name": "前门 · 大栅栏老字号",
+      "kind": "food",
+      "tags": [
+        "food",
+        "history"
+      ],
+      "area": "core",
+      "rank": 1,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "清淡少辣"
+      ],
+      "desc": "全聚德、都一处、内联升等老字号云集，京味小吃一站吃齐。",
+      "tip": "午餐人均 60-120 元；饭点等位久建议错峰",
+      "lng": 116.394877,
+      "lat": 39.895202,
+      "address": "北京城区煤市街中段与大齐家胡同33号(前门大栅栏西口往南50米)"
+    },
+    {
+      "name": "王府井 · 东安老味",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "core",
+      "rank": 2,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "步行街与老商场里的京味馆子集中，逛吃动线顺。",
+      "tip": "地下\"和平菓局\"还原老北京市井，适合拍照",
+      "lng": 116.41129,
+      "lat": 39.918864,
+      "address": "王府井大街48号北京国际艺苑皇冠假日酒店二层"
+    },
+    {
+      "name": "护国寺小吃总店",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "素食",
+        "清真"
+      ],
+      "desc": "豆汁儿、焦圈、豌豆黄、驴打滚，地道京味小吃大本营。",
+      "tip": "想挑战豆汁儿请做好心理准备",
+      "lng": 116.375257,
+      "lat": 39.934942,
+      "address": "护国寺大街68号(平安里地铁站B东北口步行250米)"
+    },
+    {
+      "name": "南锣鼓巷 · 姚记炒肝 & 文宇奶酪",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.0,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "炒肝、卤煮与奶酪组成的老北京组合，边逛边吃最合适。",
+      "tip": "炒肝配包子是本地早餐吃法",
+      "lng": 116.403112,
+      "lat": 39.938691,
+      "address": "南锣鼓巷49号"
+    },
+    {
+      "name": "静莲斋素食餐厅",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "core",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "素食",
+        "清淡少辣",
+        "不吃牛肉"
+      ],
+      "desc": "京城老牌素食餐厅，仿荤做得讲究，非素主义也会满意。",
+      "tip": "人均约 80-120 元，建议提前订位",
+      "lng": 116.414092,
+      "lat": 39.925137,
+      "address": "北京城区福隆寺店前街1号QB301-WL3-07、08号"
+    },
+    {
+      "name": "牛街清真美食街",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "west",
+      "rank": 1,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "清真"
+      ],
+      "desc": "聚宝源涮肉、白记年糕、满恒记……北京清真美食第一街。",
+      "tip": "饭点排队极久，13:00 后或 17:00 前更从容",
+      "lng": 116.36395,
+      "lat": 39.883963,
+      "address": "北京城区牛街20-22号商业楼2层"
+    },
+    {
+      "name": "白塔寺 · 妙应寺周边小馆",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.2,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "清淡少辣"
+      ],
+      "desc": "围绕白塔的胡同小馆与咖啡店，安静且有老城氛围。",
+      "tip": "适合逛完白塔后就近午餐",
+      "lng": 116.363323,
+      "lat": 39.925652,
+      "address": "阜成门内大街171号妙应寺一带"
+    },
+    {
+      "name": "颐和园路 · 西苑小吃街",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "west",
+      "rank": 3,
+      "duration": 1.2,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "noon"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "颐和园东门一带的街边餐厅群，价格亲民、上菜快。",
+      "tip": "景区周边餐饮偏贵，可参考口碑再进店",
+      "lng": 116.285573,
+      "lat": 39.998299,
+      "address": "303路;332路;346路;584路;夜8路;通游专线20路;通游专线20路区间"
+    },
+    {
+      "name": "簋街",
+      "kind": "food",
+      "tags": [
+        "food",
+        "photo"
+      ],
+      "area": "east",
+      "rank": 1,
+      "duration": 2.0,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "无辣不欢"
+      ],
+      "desc": "不夜美食街，麻辣小龙虾与胡大饭馆撑起北京的深夜江湖。",
+      "tip": "18:00 后最热闹，热门店等位可能一小时",
+      "lng": 116.424768,
+      "lat": 39.941746,
+      "address": "东直门大街5-11号"
+    },
+    {
+      "name": "三里屯太古里餐饮区",
+      "kind": "food",
+      "tags": [
+        "food",
+        "photo"
+      ],
+      "area": "east",
+      "rank": 2,
+      "duration": 1.8,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "低糖低盐"
+      ],
+      "desc": "国际化餐厅与网红店密集，可选择性强，适合多人不同口味。",
+      "tip": "热门店建议线上取号",
+      "lng": 116.455042,
+      "lat": 39.93821,
+      "address": "三里屯太古里北区N2四层(三里屯路与三里屯东三街交叉口对面)"
+    },
+    {
+      "name": "花家怡园（簋街店）",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "east",
+      "rank": 2,
+      "duration": 1.8,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "清淡少辣"
+      ],
+      "desc": "四合院式京菜馆，烤鸭与京味家常菜做得稳，环境有面子。",
+      "tip": "人均 150-200 元，宴请合适",
+      "lng": 116.418952,
+      "lat": 39.941723,
+      "address": "东直门内大街235号"
+    },
+    {
+      "name": "亚运村 · 北辰美食街",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "north",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "紧邻奥林匹克园区，连锁与特色餐馆密集，看完夜景就近吃。",
+      "tip": "晚餐高峰 18:30 左右，先取号再逛",
+      "lng": 116.391598,
+      "lat": 39.991708,
+      "address": "天辰东路12号"
+    },
+    {
+      "name": "柳沟豆腐宴",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "outskirt",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [
+        "素食",
+        "清真"
+      ],
+      "desc": "延庆民俗火盆锅豆腐宴，一桌十余道豆腐做法，冬天尤其香。",
+      "tip": "按人头配餐，人多更划算",
+      "lng": 116.095135,
+      "lat": 40.448872,
+      "address": "胡柳路"
+    },
+    {
+      "name": "环球城市大道餐饮街",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "fun",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": true,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "出园即到的餐饮娱乐街区，选择多、可续摊到晚上。",
+      "tip": "园区内餐饮偏贵，出园就餐更省心",
+      "lng": 116.661724,
+      "lat": 39.874167,
+      "address": "群芳北街与云景东路交叉口西北140米"
+    },
+    {
+      "name": "方庄美食街",
+      "kind": "food",
+      "tags": [
+        "food"
+      ],
+      "area": "outskirt",
+      "rank": 3,
+      "duration": 1.5,
+      "ticket": 0,
+      "indoor": false,
+      "windows": [
+        "noon",
+        "evening"
+      ],
+      "closed_weekday": [],
+      "diet_tags": [],
+      "desc": "南城老牌餐饮一条街，家常菜与连锁齐全，性价比高。",
+      "tip": "逛完园博园或卢沟桥顺路",
+      "lng": 116.430335,
+      "lat": 39.86383,
+      "address": "北京城区方庄芳群园二区12号楼底商"
+    }
+  ]
+}

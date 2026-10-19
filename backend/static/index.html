@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智慧景区·多省份数字人导游</title>
+    <link rel="stylesheet" href="/static/css/index.css?v=20261019"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+    <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <!-- ===== 导航栏 ===== -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-map-signs"></i>
+            <span style="font-size: 30px; font-weight: bold;">智慧景区·多省份数字人导游</span>
+        </div>
+        <div class="nav-right">
+            <button class="change-avatar-btn" onclick="openModal()">
+                <i class="fas fa-exchange-alt"></i>
+                <span>切换数字人形象</span>
+            </button>
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <span>欢迎，游客</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- ===== 侧边栏 ===== -->
+        <div class="sidebar">
+            <!-- 个性化推荐 -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-user-tag"></i> 个性化推荐</h3>
+                <div class="interest-buttons" id="interestButtons">
+                    <button class="interest-btn" data-interest="history">
+                        <i class="fas fa-landmark"></i> 对历史感兴趣
+                    </button>
+                    <button class="interest-btn active" data-interest="nature">
+                        <i class="fas fa-tree"></i> 喜欢自然风光
+                    </button>
+                    <button class="interest-btn" data-interest="photo">
+                        <i class="fas fa-camera"></i> 摄影打卡达人
+                    </button>
+                </div>
+            </div>
+
+            <!-- 行程规划 -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-route"></i> 行程规划</h3>
+                <button class="plan-btn" id="planBtn">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="plan-btn-text">
+                        <span class="plan-btn-title">定制我的行程</span>
+                        <span class="plan-btn-desc">按兴趣与时间生成专属游览计划</span>
+                    </div>
+                    <i class="fas fa-chevron-right plan-arrow"></i>
+                </button>
+            </div>
+
+            <!-- 当前位置 -->
+            <div class="sidebar-section">
+                <h3><i class="fas fa-map-marker-alt"></i> 当前位置</h3>
+                <div class="location-card">
+                    <select class="loc-select" id="locAreaSelect" title="按分区筛选景点"></select>
+                    <select class="loc-select" id="locSpotSelect" title="选择当前所在景点"></select>
+                    <div id="locBody">
+                        <div class="loc-empty"><i class="fas fa-spinner fa-spin"></i> 正在加载景点…</div>
+                    </div>
+                    <div class="loc-actions">
+                        <button class="loc-btn" id="locMapBtn"><i class="fas fa-map"></i> 查看地图</button>
+                        <button class="loc-btn primary" id="locAskBtn"><i class="fas fa-comment-dots"></i> 问导游</button>
+                    </div>
+                    <div class="loc-map-wrap" id="locMapWrap">
+                        <div class="loc-map" id="locMap"></div>
+                        <div class="loc-map-note" id="locMapNote"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 主内容区 ===== -->
+        <div class="main-content">
+            <!-- 数字人展示区 -->
+            <div class="avatar-container card">
+                <div class="panda-pet" id="pandaPet">
+                    <div class="panda-head">
+                        <div class="panda-ear left"></div>
+                        <div class="panda-ear right"></div>
+                        <div class="panda-face">
+                            <div class="panda-eye left" id="pandaEyeLeft"><span class="pupil-sparkle"></span></div>
+                            <div class="panda-eye right" id="pandaEyeRight"><span class="pupil-sparkle"></span></div>
+                            <div class="panda-nose"></div>
+                            <div class="panda-mouth" id="pandaMouth"><div class="mouth-shape"></div></div>
+                            <div class="panda-blush left"></div>
+                            <div class="panda-blush right"></div>
+                        </div>
+                    </div>
+                    <div class="panda-speech-bubble" id="pandaBubble">💬 听着呢~</div>
+                    <div class="panda-paws"><div class="panda-paw"></div><div class="panda-paw"></div></div>
+                </div>
+                <div class="digital-avatar" id="digitalAvatar">
+                    <img class="avatar-image" id="avatarImage" src="/static/images/蒙古族.png" alt="数字人导游">
+                </div>
+                <div class="current-avatar-info">
+                    <div class="current-province-name" id="currentProvinceName">蒙古族迎宾向导</div>
+                    <div class="current-province-desc" id="currentProvinceDesc">热情豪爽的草原风情</div>
+                </div>
+            </div>
+
+            <!-- 对话区域 -->
+            <div class="card">
+                <div class="chat-header">
+                    <h3><i class="fas fa-comment-dots"></i> 与数字人导游对话</h3>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- 初始消息由JS动态生成 -->
+                    </div>
+
+                    <div class="voice-text" id="voiceText"></div>
+                    <div class="audio-controls" id="audioControls">
+                        <button class="audio-btn" id="playBtn" onclick="playAudio()">▶</button>
+                        <button class="audio-btn" id="pauseBtn" onclick="pauseAudio()">⏸</button>
+                        <span class="audio-status" id="audioStatus"></span>
+                    </div>
+
+                    <div class="quick-questions">
+                        <div class="quick-question" onclick="askQuestion('景区开放时间是多少？')">景区开放时间</div>
+                        <div class="quick-question" onclick="askQuestion('门票价格是多少？')">门票价格</div>
+                        <div class="quick-question" onclick="askQuestion('推荐一条适合老人的路线')">适合老人的路线</div>
+                        <div class="quick-question" onclick="askQuestion('附近有餐厅吗？')">附近餐厅</div>
+                        <div class="quick-question" onclick="askQuestion('卫生间在哪里？')">卫生间位置</div>
+                    </div>
+
+                    <!-- ===== 输入框 ===== -->
+                    <div class="input-container">
+                        <input type="text" id="userInput" placeholder="请输入您的问题..." onkeypress="handleKeyPress(event)">
+                        <div class="input-actions">
+                            <button class="input-btn voice-btn" id="voiceBtn"><i class="fas fa-microphone"></i></button>
+                            <button class="input-btn primary" onclick="sendText()"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 模态框（仅四个民族） ===== -->
+    <div class="modal-overlay" id="avatarModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fas fa-users"></i> 选择数字人形象</h2>
+                <button class="modal-close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="route-card active" onclick="selectPersona('persona_mongolian')">
+                    <img class="modal-avatar-img" src="/static/images/蒙古族.png" alt="蒙古族迎宾向导">
+                    <div class="route-title"><span>蒙古族迎宾向导</span></div>
+                    <div class="route-desc">热情豪爽，草原风情</div>
+                    <div class="route-tags"><span class="route-tag">热情</span><span class="route-tag">豪爽</span></div>
+                </div>
+                <div class="route-card" onclick="selectPersona('persona_tibetan')">
+                    <img class="modal-avatar-img" src="/static/images/藏族.png" alt="藏族吉祥使者">
+                    <div class="route-title"><span>藏族吉祥使者</span></div>
+                    <div class="route-desc">圣洁友好，扎西德勒</div>
+                    <div class="route-tags"><span class="route-tag">圣洁</span><span class="route-tag">友好</span></div>
+                </div>
+                <div class="route-card" onclick="selectPersona('persona_miao')">
+                    <img class="modal-avatar-img" src="/static/images/苗族.png" alt="苗族艺术向导">
+                    <div class="route-title"><span>苗族艺术向导</span></div>
+                    <div class="route-desc">灵动活泼，非遗风情</div>
+                    <div class="route-tags"><span class="route-tag">灵动</span><span class="route-tag">活泼</span></div>
+                </div>
+                <div class="route-card" onclick="selectPersona('persona_uyghur')">
+                    <img class="modal-avatar-img" src="/static/images/维吾尔族.png" alt="维吾尔族热情小伙">
+                    <div class="route-title"><span>维吾尔族热情小伙</span></div>
+                    <div class="route-desc">能歌善舞，果香四溢</div>
+                    <div class="route-tags"><span class="route-tag">能歌善舞</span><span class="route-tag">热情</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/js/trip_planner.js"></script>
+
+    <script src="/static/js/panda.js?v=20261019"></script>
+    <script src="/static/js/location_card.js?v=20261019"></script>
+    <script>
+        // ================================================================
+        //  数字人配置（仅保留四个民族）
+        // ================================================================
+        const avatarList = [
+            { id: 'persona_mongolian', image: '蒙古族.png', name: '蒙古族迎宾向导', description: '热情豪爽的草原风情', greeting: '赛拜努！欢迎来到草原！让我带您领略蒙古风情！', accent: '豪迈风格' },
+            { id: 'persona_tibetan', image: '藏族.png', name: '藏族吉祥使者', description: '圣洁友好的雪域文化', greeting: '扎西德勒！愿您吉祥如意，一路平安！', accent: '温柔风格' },
+            { id: 'persona_miao', image: '苗族.png', name: '苗族艺术向导', description: '灵动活泼的苗寨风情', greeting: '欢迎远道而来的朋友，听我敲响铜鼓，带您走进苗寨！', accent: '活泼风格' },
+            { id: 'persona_uyghur', image: '维吾尔族.png', name: '维吾尔族热情小伙', description: '能歌善舞的新疆魅力', greeting: '亚克西姆赛斯！来尝尝我们新疆的水果，随我舞动起来！', accent: '热情风格' }
+        ];
+
+        let currentAvatar = avatarList[0];
+        let currentAudio = null;
+        let isAudioPlaying = false;
+        let currentInterest = 'nature';
+
+
+        // ================================================================
+        //  核心功能
+        // ================================================================
+
+        document.addEventListener('DOMContentLoaded', function () {
+            window.sendText = sendText;       // 供 js/location_card.js「问导游」调用
+            window.addMessage = addMessage;   // 供 js/trip_planner.js「发送到对话」调用
+
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            addMessage(currentAvatar.greeting, false, currentAvatar.name + '导游');
+
+            initInterestButtons();
+            initPlanButton();
+        });
+
+        // ---- 兴趣标签 ----
+        function initInterestButtons() {
+            const buttons = document.querySelectorAll('.interest-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentInterest = this.dataset.interest;
+                    fetchRecommendRoute(currentInterest);
+                });
+            });
+        }
+
+        // ---- 调用推荐接口（结果只走聊天，不再写侧边栏） ----
+        async function fetchRecommendRoute(interest) {
+            addMessage(`⏳ 正在根据“${interestLabel(interest)}”兴趣为您生成个性化路线...`, false, getAvatarName());
+            showTyping();
+            try {
+                const res = await fetch('/api/recommend/route', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ interests: [interest] })
+                });
+                const data = await res.json();
+                hideTyping();
+                if (data.route) {
+                    const r = data.route;
+                    let msg = `您好，我是${getAvatarName()}。为您推荐一条个性化路线：\n`;
+                    msg += `📍 **${r.route_name}**（${r.duration}）\n`;
+                    msg += `📝 ${r.description}\n`;
+                    msg += `🗺️ 途经景点：${(r.waypoints || []).join(' → ')}\n`;
+                    msg += `✨ 亮点：${r.highlights}`;
+                    addMessage(msg, false, getAvatarName());
+                } else {
+                    addMessage('抱歉，生成路线失败，请稍后再试。', false, getAvatarName());
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('网络异常，无法获取推荐路线。', false, getAvatarName());
+                console.error(error);
+            }
+        }
+
+        function interestLabel(key) {
+            const map = { history: '历史人文', nature: '自然风光', photo: '摄影打卡' };
+            return map[key] || key;
+        }
+
+        // ---- 行程规划（三页：规划 / 结果 / 历史，见 static/js/trip_planner.js） ----
+        function initPlanButton() {
+            const btn = document.getElementById('planBtn');
+            if (!btn) return;
+            if (typeof window.openTripPlanner !== 'function') {
+                btn.addEventListener('click', function () {
+                    addMessage('⚠️ 行程规划模块未加载，请确认已引入 /static/js/trip_planner.js。', false, getAvatarName());
+                });
+                return;
+            }
+            btn.addEventListener('click', function () {
+                window.openTripPlanner('plan');
+                if (typeof setPandaExpression === 'function') setPandaExpression('happy');
+                const bubble = document.getElementById('pandaBubble');
+                if (bubble) bubble.textContent = '🗺️ 帮你做行程~';
+            });
+        }
+
+        // ---- 模态框 ----
+        function openModal() { document.getElementById('avatarModal').classList.add('active'); document.body.style.overflow = 'hidden'; updateModalHighlight(currentAvatar.id); }
+        function closeModal() { document.getElementById('avatarModal').classList.remove('active'); document.body.style.overflow = ''; }
+        document.getElementById('avatarModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+        function switchAvatar(avatarId) {
+            const avatar = avatarList.find(a => a.id === avatarId);
+            if (!avatar) return;
+            currentAvatar = avatar;
+            document.getElementById('currentProvinceName').textContent = avatar.name;
+            document.getElementById('currentProvinceDesc').textContent = avatar.description;
+            document.getElementById('avatarImage').src = `/static/images/${avatar.image}`;
+            updateModalHighlight(avatarId);
+            setPandaExpression('happy');
+            pandaBubble.textContent = '👋 新朋友！';
+            setTimeout(() => { pandaBubble.textContent = '💬 听着呢~'; }, 1200);
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            addMessage(avatar.greeting, false, avatar.name + '导游');
+        }
+
+        function updateModalHighlight(avatarId) {
+            const cards = document.querySelectorAll('#modalBody .route-card');
+            const ids = ['persona_mongolian', 'persona_tibetan', 'persona_miao', 'persona_uyghur'];
+            cards.forEach((card, index) => { card.classList.toggle('active', ids[index] === avatarId); });
+        }
+
+        function selectPersona(personaId) { switchAvatar(personaId); closeModal(); }
+
+        function getAvatarName() { return currentAvatar.name + '导游'; }
+
+        // ---- 生成唯一消息ID ----
+        function generateMsgId() {
+            return 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        }
+
+        // ---- 发送反馈 ----
+        async function sendFeedback(msgId, feedback) {
+            try {
+                const res = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ msg_id: msgId, feedback: feedback })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    // 更新 UI：禁用按钮，显示感谢
+                    const container = document.querySelector(`.feedback-container[data-msg-id="${msgId}"]`);
+                    if (container) {
+                        const btns = container.querySelectorAll('.feedback-btn');
+                        btns.forEach(btn => btn.disabled = true);
+                        const thanks = container.querySelector('.feedback-thanks');
+                        if (thanks) thanks.style.display = 'inline';
+                        // 可选：高亮点击的按钮
+                        const clickedBtn = container.querySelector(`.feedback-btn[data-feedback="${feedback}"]`);
+                        if (clickedBtn) {
+                            clickedBtn.style.background = '#c8e6c9';
+                            clickedBtn.style.color = '#1b5e20';
+                        }
+                    }
+                } else {
+                    alert('反馈提交失败，请稍后重试');
+                }
+            } catch (e) {
+                console.error('提交反馈失败:', e);
+                alert('网络错误，请稍后重试');
+            }
+        }
+
+        // ---- 消息（带头像 + 反馈按钮） ----
+        let _mapSeq = 0;
+        function addMessage(text, isUser, sender = '', msgId = null, map = null) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            const formattedText = text.replace(/\n/g, '<br>');
+
+            let avatarHtml = '';
+            if (!isUser) {
+                avatarHtml = `<div class="message-avatar"><img src="/static/images/${currentAvatar.image}" alt="avatar"></div>`;
+            } else {
+                avatarHtml = `<div class="message-avatar"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23ccc'/%3E%3Ccircle cx='50' cy='35' r='20' fill='%23999'/%3E%3Ccircle cx='35' cy='30' r='4' fill='%23666'/%3E%3Ccircle cx='65' cy='30' r='4' fill='%23666'/%3E%3C/svg%3E" alt="user"></div>`;
+            }
+
+            // 构建消息主体
+            let feedbackHtml = '';
+            if (!isUser && msgId) {
+                // 只有 bot 消息才显示反馈按钮
+                feedbackHtml = `
+                        <div class="feedback-container" data-msg-id="${msgId}">
+                            <div class="feedback-buttons">
+                                <button class="feedback-btn" data-feedback="positive" onclick="sendFeedback('${msgId}','positive')" title="满意">👍</button>
+                                <button class="feedback-btn" data-feedback="negative" onclick="sendFeedback('${msgId}','negative')" title="不满意">👎</button>
+                                <span class="feedback-thanks" style="display:none;">感谢反馈！</span>
+                            </div>
+                        </div>
+                    `;
+            }
+
+            // 地图占位容器（payload 非空时渲染在文字之下）
+            let mapHtml = '';
+            let mapId = null;
+            if (!isUser && map && map.markers) {
+                mapId = `msg-map-${_mapSeq++}`;
+                mapHtml = `<div class="msg-map" id="${mapId}"></div>` +
+                          (map.fallback_url ? `<div class="msg-map-fallback"><a href="${map.fallback_url}" target="_blank">在高德地图中打开 ↗</a></div>` : '');
+            }
+
+            messageDiv.innerHTML = `
+                    ${avatarHtml}
+                    <div class="message-content-wrapper">
+                        <div class="message-sender">${isUser ? '游客' : (sender || getAvatarName())}</div>
+                        <div class="message-content">${formattedText}</div>
+                        ${mapHtml}
+                        <div class="message-time">${timeString}</div>
+                        ${feedbackHtml}
+                    </div>
+                `;
+            chatMessages.appendChild(messageDiv);
+            if (mapId) renderMap(document.getElementById(mapId), map);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 按统一 MapPayload 契约渲染地图：poi 单点 / route 路径，fitBounds 自适应视野
+        function renderMap(el, map) {
+            if (!el || typeof L === 'undefined') return;
+            const gmap = L.map(el, { zoomControl: true, attributionControl: false });
+            L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+                { subdomains: '1234', maxZoom: 18 }).addTo(gmap);
+            const pts = [];
+            (map.markers || []).forEach(mk => {
+                if (mk.lng == null || mk.lat == null) return;
+                L.marker([mk.lat, mk.lng]).addTo(gmap).bindPopup(mk.name || '');
+                pts.push([mk.lat, mk.lng]);
+            });
+            if (map.path && map.path.length > 1) {
+                L.polyline(map.path.map(p => [p[1], p[0]]), { color: '#1677ff', weight: 4, opacity: 0.85 }).addTo(gmap);
+                map.path.forEach(p => pts.push([p[1], p[0]]));
+            }
+            if (map.bbox && map.bbox.length === 2) {
+                gmap.fitBounds([[map.bbox[0][1], map.bbox[0][0]], [map.bbox[1][1], map.bbox[1][0]]], { padding: [24, 24] });
+            } else if (pts.length) {
+                gmap.fitBounds(pts, { padding: [24, 24] });
+            } else if (map.center) {
+                gmap.setView([map.center[1], map.center[0]], 13);
+            }
+            setTimeout(() => gmap.invalidateSize(), 200);
+        }
+
+
+
+        function showTyping() {
+            const chatMessages = document.getElementById('chat-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing');
+            if (el) el.remove();
+        }
+
+        // ---- 文字发送（带 msg_id） ----
+        async function sendText() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const msgId = generateMsgId();
+            // 显示用户消息（不带反馈）
+            addMessage(text, true);
+
+            hideAudioControls();
+            input.value = '';
+            showTyping();
+            pandaListenToSpeech(true);
+
+            try {
+                const res = await fetch('/api/chat/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        persona: currentAvatar.id,
+                        accent: currentAvatar.accent,
+                        interests: [currentInterest],
+                        msg_id: msgId
+                    })
+                });
+                const data = await res.json();
+                hideTyping();
+
+                if (data.answer) {
+                    // 使用返回的 msg_id（后端会回传）
+                    addMessage(data.answer, false, getAvatarName(), data.msg_id || msgId, data.map);
+                    if (data.audio_url) showAudioControls(data.audio_url);
+                    else { hideAudioControls(); pandaListenToSpeech(false); }
+                } else {
+                    addMessage('抱歉，我没能理解您的问题，请再试一次～', false, getAvatarName());
+                    pandaListenToSpeech(false);
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage('网络波动，请稍后重试～', false, getAvatarName());
+                pandaListenToSpeech(false);
+                console.error('消息发送失败:', error);
+            }
+        }
+
+        function askQuestion(question) {
+            document.getElementById('userInput').value = question;
+            sendText();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendText();
+        }
+
+        // ---- 语音录制（带 msg_id） ----
+        let mediaRecorder, audioChunks = [], isRecording = false;
+        const voiceBtn = document.getElementById('voiceBtn');
+        const voiceText = document.getElementById('voiceText');
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    await sendVoice(audioBlob);
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                voiceText.textContent = '🎤 正在聆听...';
+                pandaListenToSpeech(true);
+                setPandaExpression('surprised');
+                pandaBubble.textContent = '👂 在听你说~';
+            } catch (error) {
+                voiceText.textContent = '⚠️ 无法访问麦克风，请检查权限';
+                console.error('麦克风访问失败:', error);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                voiceBtn.classList.remove('recording');
+                voiceText.textContent = '⏳ 识别中...';
+            }
+        }
+
+        voiceBtn.addEventListener('mousedown', startRecording);
+        voiceBtn.addEventListener('mouseup', stopRecording);
+        voiceBtn.addEventListener('mouseleave', () => { if (isRecording) stopRecording(); });
+        voiceBtn.addEventListener('touchstart', e => { e.preventDefault(); startRecording(); });
+        voiceBtn.addEventListener('touchend', stopRecording);
+
+        async function sendVoice(audioBlob) {
+            const msgId = generateMsgId();
+            hideAudioControls();
+            showTyping();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'recording.webm');
+                // 通过 URL 参数传递 msg_id
+                const url = `/api/chat/voice?persona=${encodeURIComponent(currentAvatar.id)}&interests=${encodeURIComponent(currentInterest)}&msg_id=${encodeURIComponent(msgId)}`;
+                const res = await fetch(url, { method: 'POST', body: formData });
+                const data = await res.json();
+                hideTyping();
+
+                if (data.user_text) voiceText.textContent = '🗣 您说：' + data.user_text;
+                if (data.answer || data.reply_text) {
+                    const replyText = data.answer || data.reply_text;
+                    addMessage(replyText, false, getAvatarName(), data.msg_id || msgId, data.map);
+                    if (data.audio_url) showAudioControls(data.audio_url);
+                    else { hideAudioControls(); pandaListenToSpeech(false); }
+                } else {
+                    pandaListenToSpeech(false);
+                }
+            } catch (error) {
+                hideTyping();
+                voiceText.textContent = '⚠️ 语音识别失败，请尝试文字输入';
+                pandaListenToSpeech(false);
+                console.error('语音发送失败:', error);
+            }
+        }
+
+        // ---- 音频播放 ----
+        function showAudioControls(audioUrl) {
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+            isAudioPlaying = false;
+            const controls = document.getElementById('audioControls');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const status = document.getElementById('audioStatus');
+            currentAudio = new Audio(audioUrl);
+            currentAudio.onplay = () => {
+                isAudioPlaying = true;
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+                status.textContent = '🔊 正在播放...';
+                pandaListenToSpeech(true);
+                setPandaExpression('talking');
+                pandaBubble.textContent = '🗣 说给你听~';
+            };
+            currentAudio.onpause = () => {
+                isAudioPlaying = false;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                status.textContent = '⏸ 已暂停';
+                pandaListenToSpeech(false);
+                setPandaExpression('happy');
+                pandaBubble.textContent = '💬 听着呢~';
+            };
+            currentAudio.onended = () => {
+                isAudioPlaying = false;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                status.textContent = '▶ 播放完毕';
+                pandaListenToSpeech(false);
+                setPandaExpression('happy');
+                pandaBubble.textContent = '💬 听着呢~';
+                setTimeout(() => {
+                    if (!isAudioPlaying) hideAudioControls();
+                }, 3000);
+            };
+            currentAudio.onerror = () => {
+                isAudioPlaying = false;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                status.textContent = '⚠️ 播放失败';
+                pandaListenToSpeech(false);
+                setPandaExpression('happy');
+                pandaBubble.textContent = '💬 听着呢~';
+            };
+            controls.classList.add('visible');
+            playBtn.disabled = false;
+            pauseBtn.disabled = true;
+            status.textContent = '▶ 点击播放语音回复';
+            currentAudio.play().catch(e => {
+                console.log('自动播放被阻止，等待用户点击');
+                status.textContent = '▶ 点击播放';
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                pandaListenToSpeech(false);
+                setPandaExpression('happy');
+                pandaBubble.textContent = '💬 听着呢~';
+            });
+        }
+
+        function hideAudioControls() {
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+            isAudioPlaying = false;
+            document.getElementById('audioControls').classList.remove('visible');
+            pandaListenToSpeech(false);
+            setPandaExpression('happy');
+            pandaBubble.textContent = '💬 听着呢~';
+        }
+
+        function playAudio() { if (currentAudio && currentAudio.paused) currentAudio.play(); }
+        function pauseAudio() { if (currentAudio && !currentAudio.paused) currentAudio.pause(); }
+
+        // ---- 清理 ----
+        window.addEventListener('beforeunload', function () {
+        // 熊猫定时器由 js/panda.js 内部自行清理
+
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+        });
+
+        console.log('✅ 已添加满意度反馈按钮功能');
+    </script>
+</body>
+</html>
