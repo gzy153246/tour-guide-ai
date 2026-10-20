@@ -23,7 +23,7 @@ from urllib.parse import quote
 import requests
 from langchain_core.tools import tool
 
-AMAP_BASE = "https://restapi.amap.com/v3"
+AMAP_BASE = os.getenv("AMAP_BASE", "https://restapi.amap.com/v3")
 _TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 # 层级：core/tools/map_guide.py -> tools -> core -> backend -> 项目根
 _BACKEND_DIR = os.path.dirname(os.path.dirname(_TOOLS_DIR))

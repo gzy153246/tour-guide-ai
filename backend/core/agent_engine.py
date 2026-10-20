@@ -45,7 +45,6 @@ class AgentEngine:
     """Agent 引擎：持有唯一的通用 Agent，工具由外部传入"""
 
     def __init__(self):
-        # 全项目唯一的模型实例
         self.llm = ChatOpenAI(
             model="deepseek-flash",
             api_key=os.getenv("DEEPSEEK_API_KEY"),
