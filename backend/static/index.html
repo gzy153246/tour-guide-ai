@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>智慧景区·多省份数字人导游</title>
-    <link rel="stylesheet" href="/static/css/index.css?v=20261019"/>
+    <link rel="stylesheet" href="/static/css/index.css?v=20261021c"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
     <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -20,6 +20,10 @@
             <button class="change-avatar-btn" onclick="openModal()">
                 <i class="fas fa-exchange-alt"></i>
                 <span>切换数字人形象</span>
+            </button>
+            <button class="change-avatar-btn" onclick="openHistory()">
+                <i class="fas fa-history"></i>
+                <span>会话历史</span>
             </button>
             <div class="user-info">
                 <div class="user-avatar"><i class="fas fa-user"></i></div>
@@ -181,6 +185,33 @@
                     <div class="route-tags"><span class="route-tag">能歌善舞</span><span class="route-tag">热情</span></div>
                 </div>
             </div>
+            <div class="modal-footer-bar">
+                <span class="memory-hint" id="memoryHint">导游还记得 0 轮对话</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 会话历史弹窗：每个会话一个固定大小的小卡片 ===== -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fas fa-history"></i> 会话历史</h2>
+                <button class="modal-close-btn" onclick="closeHistory()">✕</button>
+            </div>
+            <div class="hist-new-bar">
+                <button class="hist-new-btn" id="histNewBtn" onclick="createNewSession()">
+                    <i class="fas fa-plus"></i> 新建会话
+                </button>
+            </div>
+            <div class="modal-body" id="historyBody">
+                <div class="hist-empty">加载中…</div>
+            </div>
+            <div class="modal-footer-bar">
+                <span class="memory-hint">点卡片切回那个会话接着聊；右侧 ✕ 删除，导游会立刻忘掉它</span>
+                <button class="footer-btn danger" onclick="clearAllHistory()">
+                    <i class="fas fa-trash"></i> 清空全部会话
+                </button>
+            </div>
         </div>
     </div>
 
@@ -214,6 +245,7 @@
             window.sendText = sendText;       // 供 js/location_card.js「问导游」调用
             window.addMessage = addMessage;   // 供 js/trip_planner.js「发送到对话」调用
 
+            document.getElementById('avatarImage').dataset.persona = currentAvatar.id;
             const chatMessages = document.getElementById('chat-messages');
             chatMessages.innerHTML = '';
             addMessage(currentAvatar.greeting, false, currentAvatar.name + '导游');
@@ -289,25 +321,54 @@
         }
 
         // ---- 模态框 ----
-        function openModal() { document.getElementById('avatarModal').classList.add('active'); document.body.style.overflow = 'hidden'; updateModalHighlight(currentAvatar.id); }
+        function openModal() {
+            document.getElementById('avatarModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateModalHighlight(currentAvatar.id);
+            refreshMemoryHint();          // 顺带告诉游客：导游还记得多少
+        }
         function closeModal() { document.getElementById('avatarModal').classList.remove('active'); document.body.style.overflow = ''; }
         document.getElementById('avatarModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+        document.getElementById('historyModal').addEventListener('click', function (e) { if (e.target === this) closeHistory(); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            closeHistory(); closeModal();
+        });
 
         function switchAvatar(avatarId) {
             const avatar = avatarList.find(a => a.id === avatarId);
             if (!avatar) return;
+            const first = !document.getElementById('avatarImage').dataset.persona;
             currentAvatar = avatar;
             document.getElementById('currentProvinceName').textContent = avatar.name;
             document.getElementById('currentProvinceDesc').textContent = avatar.description;
             document.getElementById('avatarImage').src = `/static/images/${avatar.image}`;
+            document.getElementById('avatarImage').dataset.persona = avatar.id;
             updateModalHighlight(avatarId);
             setPandaExpression('happy');
-            pandaBubble.textContent = '👋 新朋友！';
+            pandaBubble.textContent = '👋 换我来陪你！';
             setTimeout(() => { pandaBubble.textContent = '💬 听着呢~'; }, 1200);
+
+            // 换形象只换人设，不动会话：聊天记录与导游记忆都留着，
+            // 人设提示词由后端在下一轮请求里按 persona 重新注入。
             const chatMessages = document.getElementById('chat-messages');
-            chatMessages.innerHTML = '';
-            addMessage(avatar.greeting, false, avatar.name + '导游');
+            if (first) {
+                addMessage(avatar.greeting, false, avatar.name + '导游');
+            } else {
+                chatMessages.appendChild(avatarSwitchNotice(avatar));
+                addMessage(avatar.greeting, false, avatar.name + '导游');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            refreshMemoryHint();
+        }
+
+        // 切形象的分割提示（纯前端展示，不会记进导游记忆）
+        function avatarSwitchNotice(avatar) {
+            const div = document.createElement('div');
+            div.className = 'avatar-switch-notice';
+            div.innerHTML = '<i class="fas fa-exchange-alt"></i> 已切换为「'
+                + histEsc(avatar.name) + '」，前面的对话仍然记得';
+            return div;
         }
 
         function updateModalHighlight(avatarId) {
@@ -319,6 +380,203 @@
         function selectPersona(personaId) { switchAvatar(personaId); closeModal(); }
 
         function getAvatarName() { return currentAvatar.name + '导游'; }
+
+        // ================================================================
+        //  会话标识与会话历史
+        // ================================================================
+        // 同一浏览器始终用同一个 session_id：刷新、重开页面导游都还认得你。
+        // 切换数字人形象**不换**它——换形象只是换人设提示词，不是换个人聊；
+        // 想换个人聊要点「清空全部记忆」（那会连界面一起重置）。
+        const SESSION_STORAGE_KEY = 'tourGuideSessionId';
+        let sessionId = (function () {
+            let v = '';
+            try { v = localStorage.getItem(SESSION_STORAGE_KEY) || ''; } catch (e) { /* 隐私模式 */ }
+            if (!v) {
+                v = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+                try { localStorage.setItem(SESSION_STORAGE_KEY, v); } catch (e) { /* 忽略 */ }
+            }
+            return v;
+        })();
+
+        function histEsc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function memoryUrl(path) { return path + '?session_id=' + encodeURIComponent(sessionId); }
+
+        async function refreshMemoryHint() {
+            const hint = document.getElementById('memoryHint');
+            if (!hint) return;
+            try {
+                const res = await fetch(memoryUrl('/api/chat/memory'));
+                const data = await res.json();
+                const rounds = data.rounds || 0;
+                hint.textContent = data.summary
+                    ? `导游还记得 ${rounds} 轮对话（另有更早内容的压缩摘要）`
+                    : `导游还记得 ${rounds} 轮对话`;
+            } catch (e) {
+                hint.textContent = '本次会话暂无记忆';
+            }
+        }
+
+        function openHistory() {
+            document.getElementById('historyModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            loadHistory();
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 面板只用于「挑会话」，所以拉的是会话列表（每个只带一句预览），
+        // 不拉全部消息——列表本身留在内存里，删除时按下标取 session_id，
+        // 避免把 id 拼进 onclick 字符串。
+        let sessionList = [];
+
+        async function loadHistory() {
+            const body = document.getElementById('historyBody');
+            body.innerHTML = '<div class="hist-empty">加载中…</div>';
+            try {
+                const res = await fetch('/api/chat/memory?current=' + encodeURIComponent(sessionId));
+                const data = await res.json();
+                sessionList = data.sessions || [];
+                renderHistory();
+            } catch (e) {
+                body.innerHTML = '<div class="hist-empty">加载失败，请稍后再试</div>';
+            }
+        }
+
+        function renderHistory() {
+            const body = document.getElementById('historyBody');
+            updateNewSessionBtn();
+            if (!sessionList.length) {
+                body.innerHTML = '<div class="hist-empty"><i class="fas fa-comments"></i>'
+                    + '<p>还没有任何会话记录</p>'
+                    + '<span>和导游聊上两句，这里就会出现你的会话</span></div>';
+                return;
+            }
+            let html = '<div class="hist-list">';
+            sessionList.forEach(function (s, i) {
+                // 卡片只放最后一句游客留言，别的都不展示；时间收进悬停提示
+                html += '<div class="hist-card' + (s.current ? ' current' : '') + '"'
+                    + ' title="' + histEsc(s.time || '') + (s.current ? ' · 当前会话' : '') + ' · 点击切换"'
+                    + ' onclick="switchSession(' + i + ')">'
+                    + '<div class="hist-icon"><i class="fas fa-comment-dots"></i></div>'
+                    + '<div class="hist-card-main">'
+                    + '<div class="hist-preview">' + histEsc(s.preview || '（暂无内容）') + '</div>'
+                    + '</div>'
+                    + '<button class="hist-del-btn" title="删除这个会话" onclick="deleteSession('
+                    + 'event, ' + i + ')"><i class="fas fa-times"></i></button>'
+                    + '</div>';
+            });
+            html += '</div>';
+            body.innerHTML = html;
+        }
+
+        // 当前会话是否还没说过话：列表里找不到自己 = 没记过任何一轮，
+        // 找得到但 0 轮且无摘要也一样。空会话不允许「新建会话」，
+        // 否则连点几次就攒一屏空卡片。
+        function currentSessionEmpty() {
+            const cur = sessionList.find(function (s) { return s.current; });
+            return !cur || (!cur.rounds && !cur.hasSummary);
+        }
+
+        function updateNewSessionBtn() {
+            const btn = document.getElementById('histNewBtn');
+            if (!btn) return;
+            const empty = currentSessionEmpty();
+            btn.disabled = empty;
+            btn.title = empty ? '当前会话还没有内容，先和导游聊两句吧'
+                              : '保留当前会话，开始一段新对话';
+        }
+
+        function createNewSession() {
+            if (currentSessionEmpty()) return;   // 双保险：按钮禁用 + 逻辑拦截
+            resetToNewSession();
+            closeHistory();
+            refreshMemoryHint();
+            if (typeof setPandaExpression === 'function') setPandaExpression('happy');
+            const bubble = document.getElementById('pandaBubble');
+            if (bubble) {
+                bubble.textContent = '🌱 新话题，开聊吧！';
+                setTimeout(function () { bubble.textContent = '💬 听着呢~'; }, 1500);
+            }
+        }
+
+        async function deleteSession(ev, i) {
+            if (ev && ev.stopPropagation) ev.stopPropagation();   // 别触发卡片的切换
+            const s = sessionList[i];
+            if (!s) return;
+            try {
+                await fetch('/api/chat/memory?session_id=' + encodeURIComponent(s.session_id),
+                            { method: 'DELETE' });
+            } catch (e) { /* 下面重载会反映真实状态 */ }
+            // 删掉的正好是自己所在的会话 = 换个人聊，界面一并重置
+            if (s.session_id === sessionId) resetToNewSession();
+            loadHistory();
+            refreshMemoryHint();
+        }
+
+        // 点卡片 = 切到那个会话接着聊：换 id、把服务端记忆里的历史重绘到聊天界面
+        async function switchSession(i) {
+            const s = sessionList[i];
+            if (!s) return;
+            if (s.session_id === sessionId) { closeHistory(); return; }   // 点的就是当前会话
+            sessionId = s.session_id;
+            try { localStorage.setItem(SESSION_STORAGE_KEY, sessionId); } catch (e) { /* 忽略 */ }
+            closeHistory();
+            await reloadChatFromMemory();
+            refreshMemoryHint();
+        }
+
+        // 按服务端记忆重绘聊天界面：有摘要先放提示，再逐轮还原；拉不到就只放 greeting
+        async function reloadChatFromMemory() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            let data = null;
+            try {
+                const res = await fetch(memoryUrl('/api/chat/memory'));
+                data = await res.json();
+            } catch (e) { /* 网络失败：界面退回 greeting，服务端记忆不受影响 */ }
+            if (data && data.summary) {
+                const div = document.createElement('div');
+                div.className = 'avatar-switch-notice';
+                div.innerHTML = '<i class="fas fa-compress"></i> 更早的对话已压缩成摘要，导游仍记得大意';
+                chatMessages.appendChild(div);
+            }
+            const turns = (data && data.turns) || [];
+            if (!turns.length) {
+                addMessage(currentAvatar.greeting, false, currentAvatar.name + '导游');
+                return;
+            }
+            turns.forEach(function (t) {
+                addMessage(t.text, t.role === 'user', currentAvatar.name + '导游');
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function clearAllHistory() {
+            if (!window.confirm('清空后导游将忘记全部会话的内容，确定吗？')) return;
+            try {
+                await fetch('/api/chat/memory', { method: 'DELETE' });
+            } catch (e) { /* 忽略 */ }
+            resetToNewSession();
+            closeHistory();
+            refreshMemoryHint();
+        }
+
+        // 换个人聊：换掉会话标识，聊天界面一并重置
+        function resetToNewSession() {
+            sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+            try { localStorage.setItem(SESSION_STORAGE_KEY, sessionId); } catch (e) { /* 忽略 */ }
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            addMessage(currentAvatar.greeting, false, currentAvatar.name + '导游');
+        }
 
         // ---- 生成唯一消息ID ----
         function generateMsgId() {
@@ -481,7 +739,8 @@
                         persona: currentAvatar.id,
                         accent: currentAvatar.accent,
                         interests: [currentInterest],
-                        msg_id: msgId
+                        msg_id: msgId,
+                        session_id: sessionId      // 同一个人继续聊；换形象不会变
                     })
                 });
                 const data = await res.json();
@@ -566,7 +825,7 @@
                 const formData = new FormData();
                 formData.append('file', audioBlob, 'recording.webm');
                 // 通过 URL 参数传递 msg_id
-                const url = `/api/chat/voice?persona=${encodeURIComponent(currentAvatar.id)}&interests=${encodeURIComponent(currentInterest)}&msg_id=${encodeURIComponent(msgId)}`;
+                const url = `/api/chat/voice?persona=${encodeURIComponent(currentAvatar.id)}&interests=${encodeURIComponent(currentInterest)}&msg_id=${encodeURIComponent(msgId)}&session_id=${encodeURIComponent(sessionId)}`;
                 const res = await fetch(url, { method: 'POST', body: formData });
                 const data = await res.json();
                 hideTyping();

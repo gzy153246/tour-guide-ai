@@ -27,6 +27,12 @@ __pycache__/
 data/*
 !data/attractions.json
 
+# 行程侧的「人工校正表」是代码资产（联网查证的闭馆结论），要入库；
+# 行程记录与三份接口缓存是运行时产物，不入库。
+!data/trip/
+data/trip/*
+!data/trip/attraction_overrides.json
+
 # ---- 日志 ----
 logs/
 *.log

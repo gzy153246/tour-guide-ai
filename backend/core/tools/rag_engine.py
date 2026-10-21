@@ -17,7 +17,7 @@ _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 if str(_BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(_BACKEND_DIR))
 
-from core.knowledge_base import KnowledgeBase
+from core.chat.knowledge_base import KnowledgeBase
 
 # ==================== 路径常量 ====================
 _PROJECT_DATA_DIR = _BACKEND_DIR.parent / "data"

@@ -27,9 +27,9 @@ from pathlib import Path
 
 MINERU_API_BASE = "https://mineru.net/api/v4"
 
-# 项目根：core/xxx.py -> core -> backend -> 项目根。数据目录一律基于 __file__ 推算，
-# 既不依赖启动目录，也不硬编码绝对路径。
-_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 项目根：core/chat/xxx.py -> chat -> core -> backend -> 项目根。
+# 数据目录一律基于 __file__ 推算，既不依赖启动目录，也不硬编码绝对路径。
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _PROJECT_DIR = os.path.dirname(_BACKEND_DIR)
 DEFAULT_DATA_DIR = os.path.join(_PROJECT_DIR, "data", "raw")
 

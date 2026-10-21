@@ -6,6 +6,9 @@
 两者通过 DocumentLoader 解耦：本模块只接收结构化文档，不关心文件来自哪种格式。
 """
 import os
+import re
+import shutil
+import sqlite3
 import time
 from typing import Dict, List
 
@@ -16,20 +19,25 @@ from langchain_community.embeddings import DashScopeEmbeddings
 from langchain_community.vectorstores import Chroma
 
 try:
-    from core.document_loader import (
+    from core.chat.document_loader import (
         DocumentLoader, MinerUCloudClient, MinerUError, _force_utf8_streams,
     )
-except ImportError:  # 兼容 `python core/knowledge_base.py` 直接运行
+except ImportError:  # 兼容 `python core/chat/knowledge_base.py` 直接运行
     from document_loader import (
         DocumentLoader, MinerUCloudClient, MinerUError, _force_utf8_streams,
     )
 
 _force_utf8_streams()  # 幂等
 
-_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 层数：core/chat/knowledge_base.py -> chat -> core -> backend -> 项目根
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _PROJECT_DIR = os.path.dirname(_BACKEND_DIR)
 DEFAULT_DATA_DIR = os.path.join(_PROJECT_DIR, "data", "raw")
 DEFAULT_VECTOR_DB_PATH = os.path.join(_PROJECT_DIR, "data", "chroma_storage")
+
+# Chroma 的段目录名：8-4-4-4-12 的 UUID
+_UUID_DIR_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
 
 
 class KnowledgeBase:
@@ -177,7 +185,12 @@ class KnowledgeBase:
         return all_texts, all_metadatas
 
     def _drop_collection(self):
-        """清空整个 collection（全量重建前调用，避免历史数据累积）"""
+        """清空整个 collection（全量重建前调用，避免历史数据累积）
+
+        Chroma 的 delete_collection 只删 sqlite 里的段记录，磁盘上的 HNSW 段目录
+        （那一堆 UUID 文件夹）它不清理，重建一次就多一个孤儿目录（Chroma 已知行为）。
+        所以删完再扫一遍：segments 表里查不到的 UUID 目录一并清掉。
+        """
         try:
             import chromadb
             client = chromadb.PersistentClient(path=self.vector_db_path)
@@ -189,6 +202,57 @@ class KnowledgeBase:
         except Exception as e:
             print(f"⚠️  清空旧向量库失败: {e}")
         self._vector_store = None
+        removed = self.prune_orphan_segments()
+        if removed:
+            print(f"🧹 顺手清掉 {len(removed)} 个无主的向量段目录")
+
+    def prune_orphan_segments(self) -> List[str]:
+        """删掉磁盘上「segments 表里查不到」的 UUID 目录
+
+        判定规则（三条全中才算无主，宁可留着也不错删）：
+        1. 目录名是 UUID；2. 里面有 HNSW 索引文件 data_level0.bin；
+        3. chroma.sqlite3 的 segments 表里查不到这个 id。
+        读不到登记信息（库不存在 / 表缺失 / 打开失败）时直接返回，不动任何文件。
+        """
+        root = self.vector_db_path
+        if not os.path.isdir(root):
+            return []
+        alive = self._registered_segment_ids()
+        if not alive:
+            return []
+        removed: List[str] = []
+        for name in os.listdir(root):
+            if name in alive or not _UUID_DIR_RE.match(name):
+                continue
+            d = os.path.join(root, name)
+            if not os.path.isdir(d):
+                continue
+            if not os.path.exists(os.path.join(d, "data_level0.bin")):
+                continue          # 不像 HNSW 段目录，不动它
+            try:
+                shutil.rmtree(d)
+                removed.append(name)
+            except Exception as e:
+                print(f"⚠️  清理无主向量段失败 [{name}]: {e}")
+        return removed
+
+    def _registered_segment_ids(self) -> set:
+        """从 chroma.sqlite3 读出还在册的段 id（只读打开，不碰数据）"""
+        db = os.path.join(self.vector_db_path, "chroma.sqlite3")
+        if not os.path.exists(db):
+            return set()
+        out = set()
+        try:
+            con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+            try:
+                for (sid, ) in con.execute("select id from segments"):
+                    out.add(str(sid).strip().lower())
+            finally:
+                con.close()
+        except Exception as e:
+            print(f"⚠️  读取向量库段信息失败: {e}")
+            return set()
+        return out
 
     def _delete_source(self, source: str) -> int:
         """删除某个来源文件的全部块（保证重复写入同一文件时幂等）"""

@@ -32,18 +32,18 @@ STATIC_IMAGES_DIR = os.path.join(STATIC_DIR, "images")    # 数字人形象图�
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-# 确保必要的目录存在（trip_plans 由 core/trip_store.py 按需创建）
+# 确保必要的目录存在（行程记录目录由 core/trip/trip_store.py 按需创建）
 for _d in (DIR_RAW, DIR_PROCESSED, DIR_PROCESSED_DOCS, DIR_UPLOADS, DIR_HISTORY, LOG_DIR):
     os.makedirs(_d, exist_ok=True)
 
 # 导入本地模块
-from core.agent_engine import get_agent_engine
-from core.asr_tts import ASRService, TTSService
+from core.chat.agent_engine import get_agent_engine
+from core.chat.asr_tts import ASRService, TTSService
 from core.tools import rag_engine
 from core.tools import map_guide
-from core import itinerary
-from core import trip_store
-from core.prompts import ROUTE_SYSTEM_PROMPT, FALLBACK_ROUTES, extract_json
+from core.trip import itinerary
+from core.trip import trip_store
+from core.prompts.shared import ROUTE_SYSTEM_PROMPT, FALLBACK_ROUTES, extract_json
 from langchain_core.messages import HumanMessage, SystemMessage
 from starlette.concurrency import run_in_threadpool
 
@@ -129,6 +129,7 @@ class ChatRequest(BaseModel):
     persona: str = "persona_guide"
     interests: Optional[List[str]] = None
     msg_id: Optional[str] = None
+    session_id: Optional[str] = None   # 不传则用默认会话；多窗口/多用户各传各的
 
 # ===== 知识库管理函数 =====
 def save_uploaded_file(file: UploadFile, upload_dir: str = DIR_UPLOADS) -> Dict[str, Any]:
@@ -243,14 +244,31 @@ def _last_ai_content(messages) -> str:
 
 
 def run_agent(engine, question: str, persona: str,
-              interests: Optional[List[str]] = None) -> Dict[str, Any]:
-    """调用通用 Agent：人设以 SystemMessage 注入，检索由工具按需完成"""
+              interests: Optional[List[str]] = None,
+              session_id: Optional[str] = None) -> Dict[str, Any]:
+    """调用通用 Agent：人设以 SystemMessage 注入，检索由工具按需完成
+
+    会话记忆（core/chat/chat_memory.py）：把「历史摘要 + 最近几轮原文」排在
+    本轮问题之前，模型才接得上话头；本轮问完再记一轮，超阈值时自动压缩。
+
+    人设是**每轮**按请求里的 persona 现取现注入的，不进会话状态——
+    所以切换数字人形象只换这段 SystemMessage，既不动会话也不清历史，
+    下一句自然由新形象接。要"换个人聊"得显式清会话（DELETE /api/chat/memory）。
+    """
     user_text = question
     if interests:
         user_text += f"\n\n（游客兴趣偏好：{'、'.join(interests)}）"
 
+    try:
+        from core.chat.chat_memory import context_messages
+        history = context_messages(session_id)
+    except Exception as e:                  # 记忆出问题也不能让对话挂掉
+        print(f"⚠️ 会话记忆读取失败（{type(e).__name__}），本轮按无记忆继续")
+        history = []
+
     state = engine.agent.invoke({
-        "messages": [engine.persona_system_message(persona), HumanMessage(content=user_text)]
+        "messages": [engine.persona_system_message(persona), *history,
+                     HumanMessage(content=user_text)]
     })
     answer = _last_ai_content(state.get("messages") if isinstance(state, dict) else state)
     sources = rag_engine.last_sources()
@@ -267,7 +285,8 @@ def run_agent(engine, question: str, persona: str,
 def agent_answer(question: str, version_id: Optional[str] = None,
                  persona: str = "persona_guide",
                  interests: Optional[List[str]] = None,
-                 msg_id: Optional[str] = None) -> Dict[str, Any]:
+                 msg_id: Optional[str] = None,
+                 session_id: Optional[str] = None) -> Dict[str, Any]:
     try:
         if version_id and version_id in agent_engine_cache:
             engine = agent_engine_cache[version_id]
@@ -280,7 +299,15 @@ def agent_answer(question: str, version_id: Optional[str] = None,
                 "sources": [],
                 "knowledge_version": "unknown"
             }
-        result = run_agent(engine, question, persona=persona, interests=interests)
+        result = run_agent(engine, question, persona=persona, interests=interests,
+                           session_id=session_id)
+        # 本轮问答记进会话记忆；累计超阈值时内部会触发一次历史压缩
+        if not str(result.get("answer", "")).startswith("获取答案时出错"):
+            try:
+                from core.chat.chat_memory import record as _remember
+                _remember(session_id, question, result.get("answer", ""))
+            except Exception as e:
+                print(f"⚠️ 会话记忆写入失败（{type(e).__name__}）")
         current_version = knowledge_versions[-1] if knowledge_versions else {}
         result["knowledge_version"] = current_version.get("version_id", "unknown")
         result["knowledge_timestamp"] = current_version.get("timestamp", "")
@@ -343,7 +370,8 @@ async def synthesize_reply(text: str, filename: str) -> Optional[str]:
 
 @app.post("/api/chat/tts")
 async def text_to_speech(req: ChatRequest):
-    result = agent_answer(req.text, req.version_id, req.persona, req.interests, req.msg_id)
+    result = agent_answer(req.text, req.version_id, req.persona, req.interests,
+                          req.msg_id, req.session_id)
     audio_url = await synthesize_reply(result['answer'], f"reply_{uuid.uuid4()}.wav")
     return {
         "question": result['question'],
@@ -358,7 +386,8 @@ async def text_to_speech(req: ChatRequest):
 
 @app.post("/api/chat/text")
 async def text_chat(req: ChatRequest):
-    result = agent_answer(req.text, req.version_id, req.persona, req.interests, req.msg_id)
+    result = agent_answer(req.text, req.version_id, req.persona, req.interests,
+                          req.msg_id, req.session_id)
     return {
         "question": result['question'],
         "answer": result['answer'],
@@ -373,7 +402,7 @@ async def text_chat(req: ChatRequest):
 @app.post("/api/chat/voice")
 async def voice_chat(file: UploadFile = File(...), version_id: Optional[str] = None,
                      persona: str = "persona_guide", interests: Optional[str] = None,
-                     msg_id: Optional[str] = None):
+                     msg_id: Optional[str] = None, session_id: Optional[str] = None):
     try:
         os.makedirs(DIR_PROCESSED, exist_ok=True)
         file_id = str(uuid.uuid4())
@@ -388,7 +417,7 @@ async def voice_chat(file: UploadFile = File(...), version_id: Optional[str] = N
         if not user_text or len(user_text.strip()) < 1:
             return {"user_text": "", "reply_text": "没有检测到语音内容"}
         interests_list = interests.split(",") if interests else None
-        result = agent_answer(user_text, version_id, persona, interests_list, msg_id)
+        result = agent_answer(user_text, version_id, persona, interests_list, msg_id, session_id)
         ai_reply = result.get('answer', '抱歉，我无法回答这个问题。')
         print(f"🤖 AI回复: {ai_reply}")
         audio_url = await synthesize_reply(ai_reply, f"reply_{uuid.uuid4()}.wav")
@@ -411,6 +440,35 @@ async def voice_chat(file: UploadFile = File(...), version_id: Optional[str] = N
             "reply_text": f"处理语音时出错: {str(e)}",
             "status": "error"
         }
+
+# ============ 会话记忆 ============
+@app.get("/api/chat/memory")
+async def chat_memory_view(session_id: Optional[str] = None,
+                           current: Optional[str] = None):
+    """会话历史
+
+    不传 session_id：列出**所有会话**，每个只给一句预览（最后一句游客留言），
+    按最近更新倒序；current 用来标记哪个是调用方自己所在的会话。
+    传了 session_id：返回那个会话的完整内容（摘要 + 逐条轮次），排障用。
+    """
+    from core.chat.chat_memory import history as _history
+    from core.chat.chat_memory import list_sessions as _list
+    from core.chat.chat_memory import stats as _stats
+    sid = (session_id or "").strip()
+    if sid:
+        return {"status": "success", **_history(sid)}
+    st = _stats("")
+    return {"status": "success", "sessions": _list(current or ""),
+            "totalSessions": st["sessions"], "totalChars": st["chars"]}
+
+
+@app.delete("/api/chat/memory")
+async def chat_memory_clear(session_id: Optional[str] = None):
+    """删掉某个会话（前端卡片右侧的 ✕）；不传则清空全部会话"""
+    from core.chat.chat_memory import clear as _clear
+    n = _clear(session_id)
+    return {"status": "success", "cleared": n}
+
 
 # ============ 反馈接口 ============
 class FeedbackRequest(BaseModel):
@@ -692,6 +750,11 @@ class TripPlanRequest(BaseModel):
     diet: Optional[List[str]] = None
     extra: str = ""
     polish: bool = True
+    # 实时校准（转场时长 / 天气 / 开放状态）；置 false 退回纯静态骨架。
+    # 服务端全局开关是环境变量 TRIP_REALTIME=0，两者任一关闭都不发外部请求
+    realtime: bool = True
+    # 规划 Agent（需求理解 + 工具核实）；置 false 退回单次需求解析，快约 5 秒
+    agent: bool = True
 
 
 @app.post("/api/trip/plan")

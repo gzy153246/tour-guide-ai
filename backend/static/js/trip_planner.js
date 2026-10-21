@@ -180,6 +180,21 @@
         display: inline-block; margin-top: 6px; font-size: 11.5px; color: #0277BD;
         background: #E1F5FE; border-radius: 6px; padding: 3px 8px;
     }
+    /* 实时校准标记：天气 / 转场 / 开放时间 */
+    .tp-day-weather {
+        font-size: 11.5px; color: #00695C; background: #E0F2F1; border: 1px solid #B2DFDB;
+        border-radius: 10px; padding: 2px 9px; white-space: nowrap;
+    }
+    .tp-slot-transfer { font-size: 11.5px; color: #78909C; margin-top: 4px; }
+    .tp-slot-open {
+        display: inline-block; margin-top: 6px; margin-right: 6px; font-size: 11.5px;
+        color: #01579B; background: #E1F5FE; border-radius: 6px; padding: 3px 8px; cursor: help;
+    }
+    .tp-slot-flag {
+        display: inline-block; margin-top: 6px; font-size: 11.5px;
+        color: #7A5A00; background: #FFF8E1; border-radius: 6px; padding: 3px 8px;
+    }
+    .tp-slot-flag.warn { color: #A04000; background: #FFF3E0; }
 
     /* 提示区 */
     .tp-tips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -529,20 +544,71 @@
         return '<div class="tp-sum-item"><div class="tp-sum-k">' + k + '</div>' +
             '<div class="tp-sum-v">' + v + '<small>' + unit + '</small></div></div>';
     }
+    /* 实时校准标记：全部对旧数据（无这些字段）安全，取不到就渲染空串 */
+    function dayWeatherHtml(d) {
+        const rt = (state.plan && state.plan.realtime) || {};
+        const w = (rt.weather || {})[d.date];
+        if (!w) return '';
+        const icon = w.grade === 'bad' ? 'fa-cloud-showers-heavy'
+            : (w.grade === 'good' ? 'fa-sun' : 'fa-cloud');
+        return '<span class="tp-day-weather"><i class="fas ' + icon + '"></i> ' +
+            esc(w.day) + ' ' + esc(w.temp || '') + '</span>';
+    }
+    function transferHtml(s) {
+        const t = s.transfer;
+        if (!t || !t.minutes) return '';
+        return '<div class="tp-slot-transfer"><i class="fas fa-route"></i> 距上一站约 ' +
+            t.minutes + ' 分钟' + (t.source === 'amap' ? '' : '（经验估算）') + '</div>';
+    }
+    function openTimeHtml(s) {
+        if (!s.opentime) return '';
+        const full = String(s.opentime);
+        const short = full.length > 26 ? full.slice(0, 26) + '…' : full;
+        return '<span class="tp-slot-open" title="' + esc(full) +
+            '"><i class="fas fa-clock"></i> 开放 ' + esc(short) + '</span>';
+    }
+    function flagHtml(s) {
+        if (s.swapped === 'bad_weather') {
+            return '<span class="tp-slot-flag warn"><i class="fas fa-cloud-rain"></i>' +
+                ' 原景点为室外，已按天气预报换成室内场馆</span>';
+        }
+        if (s.swapped === 'closed') {
+            return '<span class="tp-slot-flag warn"><i class="fas fa-door-closed"></i>' +
+                ' 原景点当天不开放，已替换</span>';
+        }
+        if (s.swapped === 'open_hours') {
+            return '<span class="tp-slot-flag warn"><i class="fas fa-clock"></i>' +
+                ' 原景点该时段不营业，已替换</span>';
+        }
+        if (s.open_adjusted) {
+            return '<span class="tp-slot-flag"><i class="fas fa-clock"></i>' +
+                ' 已按当天开放时间调整</span>';
+        }
+        if (s.adjusted) {
+            return '<span class="tp-slot-flag"><i class="fas fa-route"></i> 已按实时路况顺延</span>';
+        }
+        return '';
+    }
     function dayHtml(d) {
         return '<div class="tp-day">' +
             '<div class="tp-day-head">' +
             '<span class="tp-day-no">Day ' + d.day + '</span>' +
             '<span class="tp-day-title">' + esc(d.title) + '</span>' +
+            dayWeatherHtml(d) +
             '<span class="tp-day-meta">' + esc(d.date) + ' ｜ ' + d.slots.length + ' 项安排</span>' +
             '</div><div class="tp-timeline">' +
             d.slots.map(s =>
                 '<div class="tp-slot">' +
                 '<div class="tp-slot-time">' + esc(s.time) + '</div>' +
                 '<div class="tp-slot-body">' +
-                '<div class="tp-slot-name">' + esc(s.name) + '</div>' +
+                '<div class="tp-slot-name">' + esc(s.name) +
+                (s.must ? '<span class="tp-slot-flag"><i class="fas fa-thumbtack"></i> 您点名要去</span>' : '') +
+                '</div>' +
                 '<div class="tp-slot-desc">' + esc(s.desc) + '</div>' +
+                transferHtml(s) +
+                openTimeHtml(s) +
                 (s.tip ? '<span class="tp-slot-tip"><i class="fas fa-circle-info"></i> ' + esc(s.tip) + '</span>' : '') +
+                flagHtml(s) +
                 '</div></div>').join('') +
             '</div></div>';
     }

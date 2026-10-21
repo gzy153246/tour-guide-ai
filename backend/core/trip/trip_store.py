@@ -1,6 +1,6 @@
 """行程持久化：一条行程一个 JSON 文件
 
-目录：<项目根>/data/trip_plans/{plan_id}.json
+目录：<项目根>/data/trip/plans/{plan_id}.json
 约定：
   - plan_id 只允许 [A-Za-z0-9_-]，杜绝路径穿越
   - 写盘用「临时文件 + os.replace」原子替换，配合线程锁，并发不会写坏
@@ -23,9 +23,10 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # .../backend
+# 层数：core/trip/trip_store.py -> trip -> core -> backend -> 项目根
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 _PROJECT_DIR = os.path.dirname(_BACKEND_DIR)                                # 项目根，data 在这里
-PLAN_DIR = os.path.join(_PROJECT_DIR, "data", "trip_plans")
+PLAN_DIR = os.path.join(_PROJECT_DIR, "data", "trip", "plans")
 MAX_PLANS = 200
 
 _ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
